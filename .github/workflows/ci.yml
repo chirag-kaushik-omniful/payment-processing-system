@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: payment
+          POSTGRES_PASSWORD: payment
+          POSTGRES_DB: payment_platform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Sync workspace
+        run: go work sync
+
+      - name: Download dependencies
+        run: |
+          cd shared && go mod download
+          for svc in api-gateway auth-service payment-service provider-service wallet-service ledger-service fraud-service notification-service webhook-service reconciliation-service analytics-service; do
+            cd services/$svc && go mod download && cd ../..
+          done
+
+      - name: Vet
+        run: make lint
+
+      - name: Test
+        run: make test
+        env:
+          DATABASE_URL: postgres://payment:payment@localhost:5432/payment_platform?sslmode=disable
+          REDIS_URL: redis://localhost:6379/0
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Build all services
+        run: make build
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - auth-service
+          - payment-service
+          - provider-service
+          - wallet-service
+          - ledger-service
+          - fraud-service
+          - notification-service
+          - webhook-service
+          - reconciliation-service
+          - analytics-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -f services/${{ matrix.service }}/Dockerfile -t payment-platform/${{ matrix.service }}:ci .
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: "0"

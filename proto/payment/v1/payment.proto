@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option go_package = "github.com/omniful/payment-platform/proto/payment/v1;paymentv1";
+
+service PaymentService {
+  rpc GetPayment(GetPaymentRequest) returns (PaymentResponse);
+  rpc CreatePayment(CreatePaymentRequest) returns (PaymentResponse);
+}
+
+message GetPaymentRequest {
+  string id = 1;
+}
+
+message CreatePaymentRequest {
+  string user_id = 1;
+  int64 amount_cents = 2;
+  string currency = 3;
+  string idempotency_key = 4;
+}
+
+message PaymentResponse {
+  string id = 1;
+  string user_id = 2;
+  int64 amount_cents = 3;
+  string currency = 4;
+  string status = 5;
+  string provider = 6;
+}

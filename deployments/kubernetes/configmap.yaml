@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-platform-config
+data:
+  ENV: production
+  KAFKA_BROKERS: kafka:9092
+  REDIS_URL: redis://redis:6379/0
+  DATABASE_URL: postgres://payment:payment@postgres:5432/payment_platform?sslmode=disable
+  AUTH_SERVICE_URL: http://auth-service:8001
+  PAYMENT_SERVICE_URL: http://payment-service:8002
+  WALLET_SERVICE_URL: http://wallet-service:8004
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: payment-platform-secrets
+type: Opaque
+stringData:
+  JWT_SECRET: change-me-in-production

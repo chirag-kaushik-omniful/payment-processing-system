@@ -1,0 +1,15 @@
+---
+description: Backend clean architecture rules for payment platform
+globs: "**/*.go"
+alwaysApply: true
+---
+
+# Backend Architecture
+
+- Clean architecture is mandatory for all services
+- Business logic lives in `internal/usecase`
+- Database access only in `internal/repository`
+- HTTP handlers in `internal/handler` must remain thin
+- Use interfaces for external dependencies
+- Dependency injection via constructors in `cmd/server/main.go`
+- Structured logging with zap and correlation IDs required

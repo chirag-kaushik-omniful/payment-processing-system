@@ -1,0 +1,37 @@
+{{- if .Values.apiGateway.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.apiGateway.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.apiGateway.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.apiGateway.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ .Values.apiGateway.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.apiGateway.service.port }}
+      targetPort: {{ .Values.apiGateway.service.targetPort }}
+---
+{{- end }}
+{{- if .Values.paymentService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.paymentService.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.paymentService.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.paymentService.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ .Values.paymentService.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.paymentService.service.port }}
+      targetPort: {{ .Values.paymentService.service.targetPort }}
+{{- end }}

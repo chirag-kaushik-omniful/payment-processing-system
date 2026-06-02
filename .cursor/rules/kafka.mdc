@@ -1,0 +1,13 @@
+---
+description: Kafka event conventions
+globs: "**/kafka/**,**/service/*consumer*.go"
+alwaysApply: false
+---
+
+# Kafka Rules
+
+- Every event payload must be versioned JSON
+- Partition by aggregate id (payment_id)
+- Retry topic: `{topic}.retry`, DLQ: `{topic}.dlq`
+- Use shared/kafka Producer and Consumer abstractions
+- Consumers must be idempotent

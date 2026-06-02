@@ -1,0 +1,19 @@
+go 1.22
+
+use (
+	./services/admin-service
+	./services/analytics-service
+	./services/api-gateway
+	./services/auth-service
+	./services/fraud-service
+	./services/ledger-service
+	./services/notification-service
+	./services/payment-service
+	./services/provider-service
+	./services/reconciliation-service
+	./services/subscription-service
+	./services/wallet-service
+	./services/webhook-service
+	./shared
+	./tests/integration
+)

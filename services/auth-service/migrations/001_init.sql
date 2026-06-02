@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS roles (
+  id UUID PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_roles (
+  user_id UUID REFERENCES users(id),
+  role_id UUID REFERENCES roles(id),
+  PRIMARY KEY (user_id, role_id)
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(id),
+  token_hash TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  revoked BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO roles (id, name) VALUES
+  ('00000000-0000-0000-0000-000000000001', 'user'),
+  ('00000000-0000-0000-0000-000000000002', 'admin')
+ON CONFLICT DO NOTHING;

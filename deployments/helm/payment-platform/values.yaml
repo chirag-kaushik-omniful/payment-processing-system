@@ -1,0 +1,70 @@
+global:
+  imagePullPolicy: IfNotPresent
+  env: production
+
+apiGateway:
+  enabled: true
+  name: api-gateway
+  replicaCount: 2
+  image:
+    repository: payment-platform/api-gateway
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 500m
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  env:
+    HTTP_PORT: "8000"
+    AUTH_SERVICE_URL: http://auth-service:8001
+    PAYMENT_SERVICE_URL: http://payment-service:8002
+    WALLET_SERVICE_URL: http://wallet-service:8004
+    REDIS_URL: redis://redis:6379/0
+    OTEL_EXPORTER_OTLP_ENDPOINT: jaeger-collector:4318
+
+paymentService:
+  enabled: true
+  name: payment-service
+  replicaCount: 2
+  image:
+    repository: payment-platform/payment-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8002
+    targetPort: 8002
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  env:
+    HTTP_PORT: "8002"
+    DATABASE_URL: postgres://payment:payment@postgres:5432/payment_platform?sslmode=disable
+    REDIS_URL: redis://redis:6379/0
+    KAFKA_BROKERS: kafka:9092
+    OTEL_EXPORTER_OTLP_ENDPOINT: jaeger-collector:4318
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api.payment-platform.local
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  tls: []
+
+secrets:
+  jwtSecret: change-me-in-production

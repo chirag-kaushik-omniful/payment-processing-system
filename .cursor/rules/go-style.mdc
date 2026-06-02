@@ -1,0 +1,12 @@
+---
+description: Go style conventions
+globs: "**/*.go"
+alwaysApply: true
+---
+
+# Go Style
+
+- Always propagate `context.Context` as first parameter
+- No global mutable state
+- Constructor-based dependency injection
+- Return domain errors wrapped with shared/errors AppError where applicable
