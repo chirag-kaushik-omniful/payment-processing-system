@@ -39,9 +39,10 @@ jobs:
 
       - name: Download dependencies
         run: |
-          cd shared && go mod download
-          for svc in api-gateway auth-service payment-service provider-service wallet-service ledger-service fraud-service notification-service webhook-service reconciliation-service analytics-service; do
-            cd services/$svc && go mod download && cd ../..
+          go work sync
+          (cd shared && go mod download)
+          for svc in api-gateway auth-service payment-service provider-service wallet-service ledger-service fraud-service notification-service webhook-service reconciliation-service analytics-service admin-service subscription-service; do
+            (cd "services/$svc" && go mod download)
           done
 
       - name: Vet
@@ -83,6 +84,8 @@ jobs:
           - webhook-service
           - reconciliation-service
           - analytics-service
+          - admin-service
+          - subscription-service
     steps:
       - uses: actions/checkout@v4
 

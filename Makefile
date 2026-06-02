@@ -22,12 +22,16 @@ test:
 	done
 
 lint:
-	@go vet ./shared/... ./services/...
+	@go work sync
+	@go vet ./shared/...
+	@for svc in $(SERVICES); do \
+		( cd services/$$svc && go vet ./... ) || exit 1; \
+	done
 
 tidy:
 	@go work sync
 	@cd shared && go mod tidy
-	@for svc in $(SERVICES); do cd services/$$svc && go mod tidy && cd ../..; done
+	@for svc in $(SERVICES); do ( cd services/$$svc && go mod tidy ); done
 
 migrate-up:
 	@./scripts/migrate.sh up
